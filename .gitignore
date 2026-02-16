@@ -1,0 +1,92 @@
+# Large result directories (don't track these)
+results_*/
+simpleaf_L003*/
+scvelo_results/
+cellranger_L003/
+comparison_results/
+nfcore_scrnaseq/results_*/
+nfcore_scrnaseq/work/
+nfcore_scrnaseq/.nextflow/
+nfcore_scrnaseq/.nextflow.log*
+
+# Reference data (large files)
+splici_ref/*.fa
+splici_ref/*.fa.gz
+piscem_idx*
+.alevin_fry_home/
+
+# FASTQ files (not stored in repo)
+*.fastq
+*.fastq.gz
+*.fq
+*.fq.gz
+
+# Nextflow work directories
+work/
+.nextflow/
+.nextflow.log*
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Data files (keep only configs)
+*.pkl
+*.pkl.gz
+*.h5ad
+*.h5
+*.mtx
+*.csv
+*.tsv
+
+# Output files
+*.png
+*.pdf
+*.jpg
+figures/
+
+# Logs
+*.log
+logs/
+
+# AWS credentials (NEVER commit!)
+.aws/
+*.pem
+credentials.json
