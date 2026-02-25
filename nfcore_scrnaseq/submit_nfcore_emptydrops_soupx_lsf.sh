@@ -13,7 +13,8 @@
 # Configuration: EmptyDrops + SoupX (No CellBender)
 # ============================================================================
 #
-# Purpose: Test EmptyDrops + SoupX combination for local HPC deployment
+# Purpose: Test SoupX contamination removal for local HPC deployment
+#           (CellBender/EmptyDrops SKIPPED per colleague request)
 #
 # Job Parameters:
 #   Cores:    8
@@ -21,8 +22,8 @@
 #   Queue:    normal (HPC production queue)
 #   Walltime: 8 hours
 #
-# Expected Runtime: 60-75 minutes
-# Expected Output:  ~5,000-6,000 cells (EmptyDrops filtered)
+# Expected Runtime: 25-30 minutes (no CellBender)
+# Expected Output:  ~7,500 cells (SoupX-filtered, matches Phase 1 baseline)
 #
 # ============================================================================
 
@@ -47,7 +48,7 @@ fi
 
 # Print job info
 echo "=========================================================================="
-echo "nf-core/scrnaseq with EmptyDrops + SoupX"
+echo "nf-core/scrnaseq with SoupX (CellBender/EmptyDrops SKIPPED)"
 echo "=========================================================================="
 echo "Job ID: $LSB_JOBID"
 echo "Job Name: $LSB_JOBNAME"
@@ -68,8 +69,7 @@ nextflow run nf-core/scrnaseq \
     -c nextflow_singularity_emptydrops_soupx.config \
     --input samplesheet.csv \
     --outdir results_nfcore_emptydrops_soupx \
-    --skip_emptydrops false \
-    --skip_cellbender true
+    --skip_emptydrops true
 
 # Capture exit code
 EXIT_CODE=$?
