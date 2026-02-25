@@ -1,0 +1,263 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'AWS Batch infrastructure for nf-core/scrnaseq pipeline'
+
+Parameters:
+  ProjectName:
+    Type: String
+    Default: nfcore-scrnaseq
+    Description: Project name prefix for resources
+
+  VpcCIDR:
+    Type: String
+    Default: 10.0.0.0/16
+    Description: CIDR block for VPC
+
+  MaxvCpusCPU:
+    Type: Number
+    Default: 256
+    Description: Maximum vCPUs for CPU compute environment
+
+  MaxvCpusGPU:
+    Type: Number
+    Default: 32
+    Description: Maximum vCPUs for GPU compute environment
+
+Resources:
+  # VPC and Networking
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCIDR
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-vpc
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-igw
+
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [0, !GetAZs '']
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-public-1
+
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [1, !GetAZs '']
+      CidrBlock: 10.0.2.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-public-2
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${ProjectName}-public-rt
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: InternetGatewayAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+
+  PublicSubnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet2
+
+  # Security Group
+  BatchSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Sub ${ProjectName}-batch-sg
+      GroupDescription: Security group for AWS Batch instances
+      VpcId: !Ref VPC
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+
+  # S3 Bucket
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${ProjectName}-data-${AWS::AccountId}
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteWorkAfter7Days
+            Prefix: work/
+            Status: Enabled
+            ExpirationInDays: 7
+
+  # IAM Roles
+  BatchServiceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-batch-service-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: batch.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSBatchServiceRole
+
+  EcsInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${ProjectName}-ecs-instance-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+
+  EcsInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      InstanceProfileName: !Sub ${ProjectName}-ecs-instance-profile
+      Roles:
+        - !Ref EcsInstanceRole
+
+  # Batch Compute Environments
+  CPUComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeEnvironmentName: !Sub ${ProjectName}-cpu-env
+      Type: MANAGED
+      ServiceRole: !GetAtt BatchServiceRole.Arn
+      ComputeResources:
+        Type: EC2
+        MinvCpus: 0
+        MaxvCpus: !Ref MaxvCpusCPU
+        DesiredvCpus: 0
+        InstanceTypes:
+          - c5.xlarge
+          - c5.2xlarge
+          - c5.4xlarge
+          - m5.xlarge
+          - m5.2xlarge
+          - m5.4xlarge
+          - r5.xlarge
+          - r5.2xlarge
+        Subnets:
+          - !Ref PublicSubnet1
+          - !Ref PublicSubnet2
+        SecurityGroupIds:
+          - !Ref BatchSecurityGroup
+        InstanceRole: !GetAtt EcsInstanceProfile.Arn
+        Tags:
+          Name: !Sub ${ProjectName}-cpu-instance
+
+  GPUComputeEnvironment:
+    Type: AWS::Batch::ComputeEnvironment
+    Properties:
+      ComputeEnvironmentName: !Sub ${ProjectName}-gpu-env
+      Type: MANAGED
+      ServiceRole: !GetAtt BatchServiceRole.Arn
+      ComputeResources:
+        Type: EC2
+        MinvCpus: 0
+        MaxvCpus: !Ref MaxvCpusGPU
+        DesiredvCpus: 0
+        InstanceTypes:
+          - g4dn.xlarge
+          - g4dn.2xlarge
+          - p3.2xlarge
+        Subnets:
+          - !Ref PublicSubnet1
+          - !Ref PublicSubnet2
+        SecurityGroupIds:
+          - !Ref BatchSecurityGroup
+        InstanceRole: !GetAtt EcsInstanceProfile.Arn
+        Ec2Configuration:
+          - ImageType: ECS_AL2_NVIDIA
+        Tags:
+          Name: !Sub ${ProjectName}-gpu-instance
+
+  # Job Queues
+  CPUJobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      JobQueueName: !Sub ${ProjectName}-cpu-queue
+      Priority: 1
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref CPUComputeEnvironment
+
+  GPUJobQueue:
+    Type: AWS::Batch::JobQueue
+    Properties:
+      JobQueueName: !Sub ${ProjectName}-gpu-queue
+      Priority: 1
+      ComputeEnvironmentOrder:
+        - Order: 1
+          ComputeEnvironment: !Ref GPUComputeEnvironment
+
+Outputs:
+  BucketName:
+    Description: S3 bucket for data and results
+    Value: !Ref DataBucket
+    Export:
+      Name: !Sub ${ProjectName}-bucket
+
+  CPUQueueArn:
+    Description: CPU Job Queue ARN
+    Value: !Ref CPUJobQueue
+    Export:
+      Name: !Sub ${ProjectName}-cpu-queue
+
+  GPUQueueArn:
+    Description: GPU Job Queue ARN
+    Value: !Ref GPUJobQueue
+    Export:
+      Name: !Sub ${ProjectName}-gpu-queue
+
+  VPCId:
+    Description: VPC ID
+    Value: !Ref VPC
+    Export:
+      Name: !Sub ${ProjectName}-vpc-id

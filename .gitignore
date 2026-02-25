@@ -4,16 +4,47 @@ simpleaf_L003*/
 scvelo_results/
 cellranger_L003/
 comparison_results/
-nfcore_scrnaseq/results_*/
+nfcore_scrnaseq/results*/
 nfcore_scrnaseq/work/
 nfcore_scrnaseq/.nextflow/
 nfcore_scrnaseq/.nextflow.log*
+kallisto_refseq_results/
+test_L001/
+test_L003/
+salmon_L003_spliced_only/
+salmon_L003_spliced_only_quant/
+salmon_idx_spliced_only/
+spliced_only_ref/
+null/
 
 # Reference data (large files)
 splici_ref/*.fa
 splici_ref/*.fa.gz
 piscem_idx*
 .alevin_fry_home/
+.alevin_fry/
+refseq_splici_ref/*.fa
+refseq_splici_ref/*.gtf
+refseq_splici_ref/*.idx
+refseq_splici_ref/clean_gtf.gtf
+
+# Singularity container images
+nfcore_scrnaseq/.singularity_cache/
+nfcore_scrnaseq/singularity_cache/
+*.img
+*.sif
+
+# LSF job logs (nfcore_scrnaseq)
+nfcore_scrnaseq/*.err
+nfcore_scrnaseq/*.out
+
+# Draft/planning files (not part of codebase)
+ACTION_PLAN_RESPONSE.txt
+CRITICAL_CHARTS.txt
+IMPLEMENTATION_SUMMARY.md
+
+# Nextflow binary
+nextflow
 
 # FASTQ files (not stored in repo)
 *.fastq

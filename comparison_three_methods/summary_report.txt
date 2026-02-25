@@ -1,0 +1,46 @@
+================================================================================
+THREE-WAY COMPARISON: Cell Ranger vs Splici vs Spliced-Only
+================================================================================
+
+Sample: TSP1_lung_1 L003
+Chemistry: 10x Chromium v3
+Total reads: 101,178,006
+
+--------------------------------------------------------------------------------
+METHOD DESCRIPTIONS
+--------------------------------------------------------------------------------
+1. Cell Ranger: Genome-based alignment, spliced exons only
+2. Splici: Transcriptome + introns (spliced + unspliced counts)
+3. Spliced-Only: Transcriptome alignment, spliced transcripts only
+
+--------------------------------------------------------------------------------
+CELLS DETECTED (filtered to match CR count)
+--------------------------------------------------------------------------------
+Cell Ranger:       5,062 cells
+Splici:            5,063 cells
+Spliced-Only:      4,812 cells
+All three:         4,721 cells (93.3%)
+
+--------------------------------------------------------------------------------
+UMI COUNTS (overlapping cells)
+--------------------------------------------------------------------------------
+Cell Ranger median:      7,454 UMIs/cell
+Splici median:           7,405 UMIs/cell
+Spliced-Only median:     5,047 UMIs/cell
+
+--------------------------------------------------------------------------------
+UMI CORRELATIONS (Pearson r)
+--------------------------------------------------------------------------------
+CR vs Splici:         r = 1.0000
+CR vs Spliced-only:   r = 0.9916
+Splici vs Spliced-only: r = 0.9918
+
+--------------------------------------------------------------------------------
+KEY FINDINGS
+--------------------------------------------------------------------------------
+1. Cell overlap: 93.3% of CR cells detected by all methods
+2. Splici (spliced counts) correlates highly with CR (r=1.0000)
+3. Spliced-only correlates highly with CR (r=0.9916)
+4. Splici and Spliced-only are nearly identical (r=0.9918)
+
+================================================================================
