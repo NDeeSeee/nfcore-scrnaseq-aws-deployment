@@ -118,18 +118,18 @@ def aggregate_samples(output_dir, t2g_map, s_features, u_features):
 
         print(f"{mapping_rate:.1f}% mapped")
 
-    # Convert to DataFrames
+    # Convert to DataFrames — transpose so rows=genes, columns=samples
     print("\nCreating count matrices...")
-    df_spliced = pd.DataFrame(count_matrix_spliced).fillna(0).astype(int)
-    df_unspliced = pd.DataFrame(count_matrix_unspliced).fillna(0).astype(int)
-    df_total = pd.DataFrame(count_matrix_total).fillna(0).astype(int)
+    df_spliced = pd.DataFrame(count_matrix_spliced).fillna(0).astype(int).T
+    df_unspliced = pd.DataFrame(count_matrix_unspliced).fillna(0).astype(int).T
+    df_total = pd.DataFrame(count_matrix_total).fillna(0).astype(int).T
 
-    # Create TPM matrix from total counts
+    # Create TPM matrix: normalize per sample (column)
     df_tpm = df_total.copy().astype(float)
-    for col in df_tpm.columns:
-        total_million = df_tpm[col].sum() / 1e6
-        if total_million > 0:
-            df_tpm[col] = df_tpm[col] / total_million
+    for col in df_tpm.columns:  # col = sample name
+        total_counts = df_tpm[col].sum()
+        if total_counts > 0:
+            df_tpm[col] = df_tpm[col] / (total_counts / 1e6)
 
     return df_spliced, df_unspliced, df_total, df_tpm, pd.DataFrame(mapping_stats)
 
@@ -142,7 +142,7 @@ def save_matrices(output_dir, df_spliced, df_unspliced, df_total, df_tpm, mappin
     qc_dir = Path(output_dir) / "qc_reports"
     qc_dir.mkdir(parents=True, exist_ok=True)
 
-    # Save count matrices
+    # Save count matrices (genes × samples)
     print(f"Saving count matrices...")
     df_spliced.to_csv(matrices_dir / "count_matrix_spliced.tsv", sep='\t')
     print(f"  ✓ Spliced matrix: {df_spliced.shape[0]} genes × {df_spliced.shape[1]} samples")
@@ -166,12 +166,12 @@ def save_matrices(output_dir, df_spliced, df_unspliced, df_total, df_tpm, mappin
     su_ratio.to_csv(qc_dir / "su_ratios.tsv", sep='\t', index=False)
     print(f"  ✓ Mapping stats and S/U ratios saved")
 
-    # Gene detection statistics
+    # Gene detection statistics (per sample: how many genes detected)
     gene_detected = pd.DataFrame({
         'sample': df_total.columns,
-        'genes_detected_10': (df_total > 10).sum(),
-        'genes_detected_1': (df_total > 1).sum(),
-        'median_counts_per_gene': df_total.median(),
+        'genes_detected_10': (df_total > 10).sum(axis=0).values,
+        'genes_detected_1': (df_total > 1).sum(axis=0).values,
+        'median_counts_per_gene': [float(df_total[s].median()) for s in df_total.columns],
     })
     gene_detected.to_csv(qc_dir / "gene_detection.tsv", sep='\t', index=False)
     print(f"  ✓ Gene detection stats saved")
