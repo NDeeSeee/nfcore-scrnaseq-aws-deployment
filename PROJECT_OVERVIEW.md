@@ -1,9 +1,10 @@
 # scRNA-seq Alevin-fry Pipeline: Complete Project Overview
 
 **Project:** Development and validation of nf-core/scrnaseq (SoupX variant) for production use
-**Timeline:** January 30 - Present (ongoing Phase 2 preparation)
-**Status:** Phase 1 ✅ Complete | Phase 2 🚀 Ready | Phase 3 📋 Planned
+**Timeline:** January 30 - Present
+**Status:** Phase 1 ✅ Complete | Phase 2 🚀 Ready for AWS | Phase 3 📋 Planned
 **Approval:** ✅ Colleague (Nathan) approved
+**Last Updated:** 2026-03-04
 
 ---
 
@@ -442,6 +443,7 @@ Mar 20  └─ Target: Production deployment
 - ✅ Established SoupX configuration (colleague-approved)
 - ✅ Prepared comprehensive AWS deployment documentation
 - ✅ Created ready-to-use AWS configuration file
+- ✅ **Kallisto CMRI Bone Atlas quantification: ALL 46 samples complete** (2026-02-19)
 
 **What's Ready:**
 - 🚀 Complete Phase 2 testing documentation
@@ -450,7 +452,7 @@ Mar 20  └─ Target: Production deployment
 - 🚀 Troubleshooting guides
 
 **What's Next:**
-- Phase 2: AWS validation (estimated 2-4 hours when started)
+- Phase 2: AWS validation (when AWS credentials/queues available)
 - Phase 3: Production scaling (100+ samples)
 - Cost savings: 5-10× cheaper than Cell Ranger
 
@@ -458,10 +460,24 @@ Mar 20  └─ Target: Production deployment
 
 ---
 
+## Kallisto CMRI Bone Atlas Quantification ✅ COMPLETE (2026-02-19)
+
+A separate bulk RNA-seq quantification pipeline was completed for the CMRI Bone Atlas:
+
+| Phase | Status | Details |
+|-------|--------|---------|
+| RefSeq Splici Reference | ✅ | GRCh38.p14, 259,981 sequences, 50,116 genes |
+| Kallisto Index | ✅ | k=31, 6.3 GB, built in ~81 min |
+| Quantification | ✅ | 46/46 samples SUCCESS, 88-89% mapping, 243 min |
+| Aggregation | ✅ | count_matrix_spliced/unspliced/total.tsv + TPM + QC |
+
+**Results:** `kallisto_refseq_results/` — See `KALLISTO_QUANTIFICATION_README.md` for full details.
+
+---
+
 **Project Started:** January 30, 2026
 **Phase 1 Completed:** February 7, 2026
 **Phase 2 Prepared:** February 13, 2026
-**Phase 2 Status:** 🚀 Ready to begin
-**Next Milestone:** Phase 2 AWS testing (estimated completion Feb 20)
-
-🎉 **Project is proceeding on schedule. Ready for Phase 2 AWS deployment!**
+**Kallisto CMRI Completed:** February 19, 2026
+**Phase 2 Status:** 🚀 Ready to begin (awaiting AWS setup)
+**Last Updated:** 2026-03-04

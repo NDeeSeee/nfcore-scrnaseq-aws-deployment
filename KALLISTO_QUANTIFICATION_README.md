@@ -1,8 +1,25 @@
 # Kallisto Quantification Pipeline - CMRI Bone Atlas
 
+## Status: ALL PHASES COMPLETE ✅ (2026-02-19)
+
+| Phase | Status | Details |
+|-------|--------|---------|
+| Phase 1: RefSeq Splici Reference | ✅ Complete | 259,981 sequences, 50,116 genes |
+| Phase 2: Kallisto Index | ✅ Complete | 6.3 GB, k=31, ~81 min build |
+| Phase 3: Quantification | ✅ Complete | 46/46 SUCCESS, ~88-89% mapping, 243 min |
+| Phase 4: Aggregation | ✅ Complete | Matrices + QC reports in `kallisto_refseq_results/` |
+
+**Results location:** `kallisto_refseq_results/count_matrices/`
+- `count_matrix_spliced.tsv`, `count_matrix_unspliced.tsv`, `count_matrix_total.tsv`, `tpm_matrix.tsv`
+
+**QC reports:** `kallisto_refseq_results/qc_reports/`
+- `mapping_stats.tsv`, `gene_detection.tsv`, `su_ratios.tsv`
+
+---
+
 ## Overview
 
-This pipeline quantifies 46 CMRI bone atlas bulk RNA-seq libraries using:
+This pipeline quantified 46 CMRI bone atlas bulk RNA-seq libraries using:
 - **Kallisto 0.51.1** - Fast pseudoalignment-based quantification
 - **RefSeq Splici Reference** - High-quality curated annotation with spliced + intronic sequences
 - **Bootstrap Resampling** - 30 bootstrap samples for variance estimation
