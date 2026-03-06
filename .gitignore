@@ -16,6 +16,9 @@ salmon_L003_spliced_only_quant/
 salmon_idx_spliced_only/
 spliced_only_ref/
 null/
+work/
+workdir.noindex/
+figures/
 
 # Reference data (large files)
 splici_ref/*.fa
@@ -34,11 +37,14 @@ nfcore_scrnaseq/singularity_cache/
 *.img
 *.sif
 
-# LSF job logs (nfcore_scrnaseq)
+# LSF job logs (root-level and nfcore_scrnaseq)
+*.err
+*.out
 nfcore_scrnaseq/*.err
 nfcore_scrnaseq/*.out
 
 # Draft/planning files (not part of codebase)
+EMAIL_*.txt
 ACTION_PLAN_RESPONSE.txt
 CRITICAL_CHARTS.txt
 IMPLEMENTATION_SUMMARY.md
