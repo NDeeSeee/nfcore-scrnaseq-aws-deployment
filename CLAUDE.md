@@ -2,6 +2,49 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Repository Orientation
+
+This repo (`nfcore-scrnaseq-aws-deployment`) develops a cost-effective, production alternative to Cell Ranger using the alevin-fry ecosystem, packaged as **nf-core/scrnaseq** and deployed on **AWS Batch**. Three workstreams:
+
+1. **nf-core/scrnaseq pipeline** (`nfcore_scrnaseq/`) — primary deliverable; SoupX-only config
+2. **AWS Batch deployment** (`nfcore_scrnaseq/aws/`) — CloudFormation + run scripts
+3. **Kallisto CMRI Bone Atlas** (`kallisto_quantify_cmri.sh`, `refseq_splici_ref/`) — ✅ complete (46/46 samples)
+
+The alevin-fry/simpleaf commands below are the **reference-building & validation substrate** for these pipelines, not the end product.
+
+**Note:** Most scripts use HPC paths (`/data/salomonis-archive/...`) with LSF/Singularity. This macOS clone is a docs/scripts mirror — those paths are not present locally.
+
+Status & history: `PROJECT_OVERVIEW.md`. Phase 1 done, Phase 2 (AWS) ready, Phase 3 planned.
+
+## nf-core/scrnaseq Pipeline (SoupX variant)
+
+```bash
+conda activate nextflow-env          # NOT bio-cli (that's for simpleaf/alevin-fry)
+cd nfcore_scrnaseq
+bsub < submit_nfcore_lsf.sh          # HPC submission (recommended)
+# or direct:
+bash run_nfcore_scrnaseq.sh          # nf-core/scrnaseq -r 3.0.0, aligner=alevin, 10XV3
+```
+Approved config: `nextflow_singularity_soupx.config` — `--skip_emptydrops --skip_cellbender`, SoupX only (colleague decision). Output: `results/.../*.h5ad`.
+
+## AWS Batch Deployment
+
+```bash
+cd nfcore_scrnaseq/aws
+bash upload_to_s3.sh                 # stage reference + FASTQs to S3
+bash run_aws.sh                      # launch on AWS Batch (cloudformation-batch.yaml)
+```
+Config: `aws_batch_soupx_phase2.config` (2 placeholders to fill). See `aws/AWS_DEPLOYMENT_GUIDE.md`.
+
+## Kallisto CMRI Quantification (complete)
+
+```bash
+conda activate bio-cli
+bash kallisto_quantify_cmri.sh       # GNU parallel, 4 jobs × 8 threads, bootstrap=30
+python kallisto_aggregate_results.py # → count_matrix_{spliced,unspliced,total}.tsv
+```
+RefSeq splici (GRCh38.p14). Results in `kallisto_refseq_results/`. See `KALLISTO_QUANTIFICATION_README.md`.
+
 ## Overview
 
 This is an alevin-fry single-cell RNA-seq quantification workspace for processing scRNA-seq data using the salmon/alevin-fry ecosystem. The workspace contains pre-built splici references and piscem indexes for GRCh38 human genome.
