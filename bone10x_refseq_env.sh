@@ -22,6 +22,8 @@ SPLICI_FA="$REFDIR/splici_refseq_fl86.fa"
 T2G_GENE="$REFDIR/splici_refseq_fl86_t2g_3col.tsv"          # tx -> gene symbol, S/U
 T2G_ISO="$REFDIR/splici_refseq_fl86_t2g_3col.isoform.tsv"   # built by prep script
 INDEX="$REFDIR/piscem_idx_refseq"                           # piscem prefix, not a dir
+# Existence checks use ${INDEX}.ctab: piscem >=0.2x writes .ssi where older
+# versions wrote .sshash; .ctab is common to both.
 
 # FASTQ tree moved: TCGA/CMRI_bone10x -> TCGA/CMRI_all/CMRI_bone10x
 SAMPLESHEET_OLD="$WD/cmri_bone10x_samplesheet.tsv"

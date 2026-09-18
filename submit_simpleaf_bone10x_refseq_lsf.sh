@@ -32,7 +32,7 @@ set -euo pipefail
 source /data/salomonis-archive/FASTQs/NCI-R01/alevin_fry/bone10x_refseq_env.sh
 THREADS=8
 
-for f in "$SAMPLESHEET" "${INDEX}.sshash" "$T2G_GENE" "$T2G_ISO"; do
+for f in "$SAMPLESHEET" "${INDEX}.ctab" "$T2G_GENE" "$T2G_ISO"; do
     [[ -f "$f" ]] || { echo "ERROR: missing $f (run prep + index build first)"; exit 1; }
 done
 

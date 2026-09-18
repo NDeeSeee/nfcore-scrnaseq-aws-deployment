@@ -20,7 +20,9 @@ if [[ ! -x "$TOOLBIN/simpleaf" ]]; then
     echo "== creating env (alevin-fry pinned to the March version) =="
     "$MM" create -y -r "$TOOLROOT" -n af \
         --strict-channel-priority -c conda-forge -c bioconda \
-        simpleaf piscem alevin-fry=0.11.2
+        simpleaf piscem alevin-fry=0.11.2 'salmon>=1.10,<2'
+    # salmon is never used (piscem maps), but simpleaf 0.20 version-checks any
+    # salmon on PATH and rejects 2.x, which bioconda otherwise pulls in.
 fi
 
 echo "== simpleaf home: $ALEVIN_FRY_HOME =="

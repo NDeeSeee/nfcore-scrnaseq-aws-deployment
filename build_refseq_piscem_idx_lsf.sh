@@ -18,8 +18,8 @@
 set -euo pipefail
 source /data/salomonis-archive/FASTQs/NCI-R01/alevin_fry/bone10x_refseq_env.sh
 
-if [[ -f "${INDEX}.sshash" ]]; then
-    echo "Index already present: ${INDEX}.sshash — nothing to do."
+if [[ -f "${INDEX}.ctab" ]]; then
+    echo "Index already present: ${INDEX}.* — nothing to do."
     exit 0
 fi
 
